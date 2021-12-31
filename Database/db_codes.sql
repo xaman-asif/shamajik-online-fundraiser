@@ -1,0 +1,102 @@
+CREATE DATABASE IF NOT EXISTS SHAMAJIK;
+
+USE SHAMAJIK;
+
+CREATE TABLE userInfo (
+    username VARCHAR(32) NOT NULL PRIMARY KEY,
+    userrole VARCHAR(32) NOT NULL DEFAULT 'Individual',
+    verified TINYINT(1) NOT NULL DEFAULT 0,
+    raised INT NOT NULL DEFAULT 0,
+    funded INT NOT NULL DEFAULT 0,
+    fullname VARCHAR(32) NOT NULL,
+    contact VARCHAR(32) NOT NULL,
+    location VARCHAR(32) NOT NULL 
+);
+
+CREATE TABLE userCredential (
+    cred INT NOT NULL UNIQUE AUTO_INCREMENT,
+    user VARCHAR(32) NOT NULL UNIQUE,
+    pass VARCHAR(255) NOT NULL,
+    PRIMARY KEY(cred),
+    FOREIGN KEY(user) REFERENCES userInfo(username) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE posts (
+    user VARCHAR(32) NOT NULL,
+    postID INT NOT NULL UNIQUE AUTO_INCREMENT,
+    title VARCHAR(64) NOT NULL,
+    descr TEXT NOT NULL,
+    fundNeeded INT NOT NULL CHECK(fundNeeded >= 0),
+    fundRaised INT NOT NULL DEFAULT 0,
+    totalDonors INT NOT NULL DEFAULT 0,
+    location VARCHAR(32) NOT NULL,
+    catagory VARCHAR(32) NOT NULL,
+    enddate DATE NOT NULL,
+    image VARCHAR(100) NOT NULL,
+    PRIMARY KEY(postID),
+    FOREIGN KEY(user) REFERENCES userInfo(username) ON UPDATE CASCADE ON DELETE CASCADE
+);
+
+CREATE TABLE blogs (
+    username VARCHAR(32) NOT NULL,
+    blog_ID INT NOT NULL UNIQUE AUTO_INCREMENT,
+    loved INT NOT NULL DEFAULT 0,
+    title VARCHAR(100),
+    descr TEXT,
+    publish DATETIME DEFAULT CURRENT_TIMESTAMP,
+    image VARCHAR(100) NOT NULL,
+    PRIMARY KEY(blog_ID),
+    FOREIGN KEY(username) REFERENCES userInfo(username) ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE admins (
+    admin_id VARCHAR(32) NOT NULL UNIQUE,
+    fullname VARCHAR(32) NOT NULL,
+    phone VARCHAR(32) NOT NULL,
+    email VARCHAR(32) NOT NULL,
+    location VARCHAR(64) NOT NULL,
+    PRIMARY KEY(admin_id)
+);
+
+CREATE TABLE comments (
+    comment_ID INT NOT NULL UNIQUE AUTO_INCREMENT,
+    username VARCHAR(32) NOT NULL,
+    postID INT NOT NULL,
+    publish DATETIME DEFAULT CURRENT_TIMESTAMP,
+    cmnttext TEXT NOT NULL,
+    PRIMARY KEY(comment_ID),
+    FOREIGN KEY(username) REFERENCES userInfo(username) ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY(postID) REFERENCES posts(postID) ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+CREATE TABLE threads (
+    dissID INT NOT NULL UNIQUE AUTO_INCREMENT,
+    username VARCHAR(32) NOT NULL,
+    blog_ID INT NOT NULL,
+    postedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    cmnttext TEXT NOT NULL,
+    PRIMARY KEY(dissID),
+    FOREIGN KEY(username) REFERENCES userInfo(username) ON UPDATE CASCADE
+        ON DELETE CASCADE,
+    FOREIGN KEY(blog_ID) REFERENCES blogs(blog_ID) ON UPDATE CASCADE
+        ON DELETE CASCADE
+);
+
+ALTER TABLE posts ADD verified BOOLEAN DEFAULT FALSE;
+ALTER TABLE `userInfo` DROP `verified`;
+
+CREATE TABLE IF NOT EXISTS payment (
+	serialno INT NOT NULL AUTO_INCREMENT,
+	user VARCHAR(32) NOT NULL DEFAULT 'Others',	
+    post INT NOT NULL,
+    type VARCHAR(16) NOT NULL,
+    amount INT NOT NULL DEFAULT 0,
+    donatedOn DATETIME DEFAULT CURRENT_TIMESTAMP,
+    remark VARCHAR(32) NOT NULL,	
+    PRIMARY KEY(serialno),
+    FOREIGN KEY(post) REFERENCES posts(postID),
+    FOREIGN KEY(user) REFERENCES userInfo(username)
+)
